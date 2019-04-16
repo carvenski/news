@@ -37,7 +37,7 @@ var upgrader = websocket.Upgrader{}
 func handler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	checkError(err)	
-	defer conn.Close()	
+	defer conn.Close()
 	//now ws connected.
 
 	// handle first message: 
@@ -51,6 +51,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	userglobalmap[id] = tmp[1:]
 	connglobalmap[id] = conn
 	partnerglobalmap[id] = ""
+	defer func () {
+		// empty user info when offline
+		connglobalmap[id] = nil
+		partnerglobalmap[partnerglobalmap[id]] = ""
+		partnerglobalmap[id] = ""
+	}()
 
 	// finding partner until found.
 	for {
@@ -58,8 +64,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		// i have no partner, finding
 		if partnerglobalmap[id] == "" {
 			for k, v := range partnerglobalmap {
-				// not myself
-				if id != k {
+				// not myself and someone online
+				if id != k && connglobalmap[k] != nil {
 					// found someone no partner too or his partner is me
 					if  v == "" || v == id {
 						// i am already found by A when i found B
@@ -77,14 +83,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}	
 
-	// start chatting with partner
+	// start chatting with partner.
+	// A <-> server <-> B
 	for {
+		// server wait here until client send message
 		mt, message, err := conn.ReadMessage()
 		checkError(err)
-
-
-
-		err = conn.WriteMessage(mt, message)
+		// send message to partner
+		partnerconn := connglobalmap[partnerglobalmap[id]]
+		// if partner offline
+		if partnerconn == nil {
+			partnerconn.WriteMessage(mt, []byte("[offline] sorry, your partner is offline."))
+		}
+		err = partnerconn.WriteMessage(mt, message)
 		checkError(err)
 	}
 }
