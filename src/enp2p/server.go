@@ -77,7 +77,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
     // finding partner until found.
     FINDING_PARTNER:
     for {
-        log.Printf( "client [%s] is finding partner...", id)
+        log.Printf( "client %s is finding partner...", id)
         time.Sleep(3*time.Second)
         // i have no partner, finding
         if partnerglobalmap[id] == "" {
@@ -109,7 +109,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
         mt, message, err := conn.ReadMessage()
         if err != nil {
             // this client offline
-            log.Printf("=> client offline: %s", err.Error())
+            log.Printf("=> client %s offline: %s", id, err.Error())
             break
         }        
         // if partner offline
