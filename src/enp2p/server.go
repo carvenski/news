@@ -25,26 +25,42 @@ var userglobalmap = make(map[string][]string)
 var connglobalmap = make(map[string]*websocket.Conn)
 var partnerglobalmap = make(map[string]string)
 
-func main() {	
+func main() {
+    // set log format
+    log.SetFlags(log.Lshortfile | log.LstdFlags)    
     http.HandleFunc("/", handler)
     log.Println("ws server start at :35000...")
     err := http.ListenAndServe(":35000", nil)
-    checkError(err)	
+    if err != nil {
+        log.Printf("Error => %s", err.Error())
+    }    
     log.Println("ws server stopped.")
 }
 
 var upgrader = websocket.Upgrader{}
 func handler(w http.ResponseWriter, r *http.Request) {
     conn, err := upgrader.Upgrade(w, r, nil)
-    checkError(err)	
-    defer conn.Close()
+    if err != nil {
+        log.Printf("Error => %s", err.Error())
+    }    
+    defer func ()  {
+        // close conn
+        conn.Close()
+        // try-catch any exception, do nothing just return
+        if err := recover(); err != nil {
+            log.Println("ERROR => ", err)
+        }
+    }()
     //now ws connected.
+    log.Println("1 ws client connected from: ", conn.RemoteAddr())
 
     // handle first message: 
     // must be user's id/sex/nickname/desc/avatar(send by js on_connected)
     // client js must do strip, then join them with '\n'
     _, message, err := conn.ReadMessage()
-    checkError(err)
+    if err != nil {
+        log.Printf("Error => %s", err.Error())
+    }    
     tmp := strings.Split(string(message), "\n")
     // register self into global map
     id := tmp[0]
@@ -59,7 +75,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
     }()
 
     // finding partner until found.
+    FINDING_PARTNER:
     for {
+        log.Printf( "client [%s] is finding partner...", id)
         time.Sleep(3*time.Second)
         // i have no partner, finding
         if partnerglobalmap[id] == "" {
@@ -86,26 +104,27 @@ func handler(w http.ResponseWriter, r *http.Request) {
     // start chatting with partner.
     // A <-> server <-> B
     for {
+        log.Println("chatting...")
         // server wait here until client send message
         mt, message, err := conn.ReadMessage()
-        checkError(err)
+        if err != nil {
+            // this client offline
+            log.Printf("=> client offline: %s", err.Error())
+            break
+        }        
+        // if partner offline
+        if partnerglobalmap[id] == "" {
+            conn.WriteMessage(mt, []byte("[WARNING] sorry, your partner is offline."))
+            goto FINDING_PARTNER
+        }
         // send message to partner
         partnerconn := connglobalmap[partnerglobalmap[id]]
-        // if partner offline
-        if partnerconn == nil {
-            partnerconn.WriteMessage(mt, []byte("[offline] sorry, your partner is offline."))
-        }
         err = partnerconn.WriteMessage(mt, message)
-        checkError(err)
+        if err != nil {
+            log.Printf("Error => %s", err.Error())
+        }    
     }
 }
-
-func checkError(err error) {
-    if err != nil {
-        log.Printf("Error => %s", err.Error())
-    }
-}
-
 
 
 
