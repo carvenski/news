@@ -2,10 +2,10 @@ import Taro, { Component } from '@tarojs/taro'
 import { View, Text } from '@tarojs/components'
 import './index.css'
 
-export default class Index extends Component {
+export default class User extends Component {
 
   config = {
-    navigationBarTitleText: '首页'
+    navigationBarTitleText: 'user'
   }
 
   componentWillMount () { }
@@ -21,7 +21,7 @@ export default class Index extends Component {
   render () {
     return (
       <View className='index'>
-        <Text>Please Login First.</Text>
+        <Text>Hello world!</Text>
       </View>
     )
   }
