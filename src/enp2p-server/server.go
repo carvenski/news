@@ -20,6 +20,15 @@ there are 3 table in mem:
 client: 
 login -> click start -> websocket conected -> send user data to register self
 -> waiting partner -> chatting
+
+client <-> server exchange special str as special signal !
+when got those messages, client/server should do special handler logic.
+format:
+"[[signal]](...)"
+define:
+"finding partner"
+"found partner"   (will carry partner info in this message)
+"partner offline"
 */
 var userglobalmap = make(map[string][]string)
 var connglobalmap = make(map[string]*websocket.Conn)
@@ -75,6 +84,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
     }()
 
     // finding partner until found.
+    conn.WriteMessage(1, []byte("[[signal]](finding partner)"))
     FINDING_PARTNER:
     for {
         log.Printf( "client %s is finding partner...", id)
@@ -99,7 +109,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
         } else {
             break
         }
-    }	
+    }
+    // found partner
+    partnerInfo := append(userglobalmap[partnerglobalmap[id]], partnerglobalmap[id])
+    signal := "[[signal]](found partner)" + strings.Join(partnerInfo, "\n")
+    conn.WriteMessage(1, []byte(signal))
 
     // start chatting with partner.
     // A <-> server <-> B
@@ -114,7 +128,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
         }        
         // if partner offline
         if partnerglobalmap[id] == "" {
-            conn.WriteMessage(mt, []byte("[WARNING] sorry, your partner is offline."))
+            conn.WriteMessage(mt, []byte("[[signal]](partner offline)"))
             goto FINDING_PARTNER
         }
         // send message to partner
