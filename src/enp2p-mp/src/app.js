@@ -12,13 +12,17 @@ import './app.css'
 class App extends Component {
 
   config = {
+    // page router
     pages: [
-      'pages/index/index'
+      'pages/index/index',
+      'pages/index/chat',
+      'pages/index/finding',
+      'pages/index/user',
     ],
     window: {
       backgroundTextStyle: 'light',
       navigationBarBackgroundColor: '#fff',
-      navigationBarTitleText: 'WeChat',
+      navigationBarTitleText: 'enp2p',
       navigationBarTextStyle: 'black'
     }
   }

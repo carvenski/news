@@ -2,10 +2,10 @@ import Taro, { Component } from '@tarojs/taro'
 import { View, Text } from '@tarojs/components'
 import './index.css'
 
-export default class Finding extends Component {
+export default class Find extends Component {
 
   config = {
-    navigationBarTitleText: 'Finding'
+    navigationBarTitleText: 'find'
   }
 
   componentWillMount () { }
