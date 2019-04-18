@@ -1,4 +1,16 @@
-p2p通信，发送文本+语音+图片
+# enp2p通信小程序, 可发送文本+语音+图片
 
+1.login page
+用户登录,获取user info,上传至server注册user信息
 
+2.finding partner page
+等待匹配partner
+
+3.chat page
+聊天页面
+
+4.avatar page
+点击用户头像,可进入信息展示页(user info)
+
+# 登录 -> 匹配 -> 聊天
 
