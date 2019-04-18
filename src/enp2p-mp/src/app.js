@@ -16,7 +16,7 @@ class App extends Component {
     pages: [
       'pages/index/index',
       'pages/index/chat',
-      'pages/index/finding',
+      'pages/index/find',
       'pages/index/user',
     ],
     window: {

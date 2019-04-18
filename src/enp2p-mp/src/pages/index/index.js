@@ -10,7 +10,26 @@ export default class Index extends Component {
 
   componentWillMount () { }
 
-  componentDidMount () { }
+  componentDidMount () { 
+    console.log("==========")
+
+    Taro.getSetting({
+      complete: function (res) {
+        console.log("=> 用户是否登陆", res.authSetting["scope.userInfo"])
+      }
+    });
+
+    Taro.getUserInfo({
+      scope: "scope.userInfo",
+      complete: function (res) {
+        console.log(res);
+      }
+
+    });
+
+
+  }
+
 
   componentWillUnmount () { }
 
@@ -20,8 +39,9 @@ export default class Index extends Component {
 
   render () {
     return (
-      <View className='index'>
+      <View>
         <Text>Please Login First.</Text>
+        <button open-type="getUserInfo">请您授权</button>
       </View>
     )
   }
